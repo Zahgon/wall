@@ -1,24 +1,40 @@
-from django.urls import resolve, reverse
-from rest_framework.test import APITestCase
-from ads import views
+"""Tests that the ads paths reach the expected handlers."""
+
+from __future__ import annotations
+
+from typing import Callable
+
+from fastapi import APIRouter, FastAPI
+from fastapi.routing import APIRoute
+
+from ads import routes
 from ads.models import Ad
 
 
-class TestUrls(APITestCase):
+class TestUrls:
+    def test_ad_list_url(
+        self, app: FastAPI, route_named: Callable[[APIRouter, str], APIRoute]
+    ) -> None:
+        assert app.url_path_for("ad_list") == "/api/ads/all"
 
-    @classmethod
-    def setUpTestData(cls):
-        cls.ad = Ad.objects.create(title='Iphone', caption='Nice')
+        route = route_named(routes.router, "ad_list")
+        assert route.endpoint is routes.ad_list
+        assert route.methods == {"GET"}
 
+    def test_ad_create_url(
+        self, app: FastAPI, route_named: Callable[[APIRouter, str], APIRoute]
+    ) -> None:
+        assert app.url_path_for("ad_create") == "/api/ads/add"
 
-    def test_ad_list_url(self):
-        url = reverse('ads:ad_list')
-        self.assertEqual(resolve(url).func.view_class, views.AdListView)
+        route = route_named(routes.router, "ad_create")
+        assert route.endpoint is routes.ad_create
+        assert route.methods == {"POST"}
 
-    def test_ad_create_url(self):
-        url = reverse('ads:ad_create')
-        self.assertEqual(resolve(url).func.view_class, views.AdCreateView)
+    def test_ad_detail_url(
+        self, app: FastAPI, ad: Ad, route_named: Callable[[APIRouter, str], APIRoute]
+    ) -> None:
+        assert app.url_path_for("ad_detail", pk=str(ad.id)) == f"/api/ads/{ad.id}"
 
-    def test_ad_detail_url(self):
-        url = reverse('ads:ad_detail', args=(self.ad.id,))
-        self.assertEqual(resolve(url).func.view_class, views.AdDetailView)
+        route = route_named(routes.router, "ad_detail")
+        assert route.endpoint is routes.ad_detail
+        assert route.methods == {"GET", "PUT", "DELETE"}

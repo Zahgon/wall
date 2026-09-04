@@ -1,48 +1,54 @@
-from django.db import models
-from django.utils.translation import gettext_lazy as _
+"""User creation and lookup.
+
+Creating a user goes through here rather than through the model directly,
+because a username has to be normalised first and the raw password has to be
+hashed before it reaches the database.
+"""
+
+from __future__ import annotations
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from accounts.models import User
+from wall.i18n import _
+
+MINIMUM_USERNAME_LENGTH = 4
 
 
+class UserManager:
+    """Session bound helper for creating and fetching users."""
 
-class BaseUserManager(models.Manager):
+    model = User
+
+    def __init__(self, session: Session) -> None:
+        self.session = session
+
     @classmethod
-    def normalize_username(cls, username):
-        """
-        Normalize the username by lowercasing it.
-        """
+    def normalize_username(cls, username: str | None) -> str:
         username = username or ""
-        if len(username) < 4:
-            raise ValueError(_('username must have at least 4 characters'))
+        if len(username) < MINIMUM_USERNAME_LENGTH:
+            raise ValueError(_("username must have at least 4 characters"))
         return username.lower()
 
-    def get_by_natural_key(self, username):
-        return self.get(**{self.model.USERNAME_FIELD: username})
+    def get_by_natural_key(self, username: str) -> User | None:
+        return self.session.scalar(select(User).where(User.username == username))
 
-
-class UserManager(BaseUserManager):
-
-    def create_user(self, username, password=None):
-        """
-        Creates and saves a User with the given username and password.
-        """
+    def create_user(self, username: str | None, password: str | None = None) -> User:
         if not username:
-            raise ValueError(_('Users must have a username'))
-
-        user = self.model(
-            username=self.normalize_username(username)
-        )
-
+            raise ValueError(_("Users must have a username"))
+        user = self.model(username=self.normalize_username(username))
         user.set_password(password)
-        user.save(using=self._db)
+        self.session.add(user)
+        self.session.commit()
+        self.session.refresh(user)
         return user
 
-    def create_superuser(self, username, password=None):
-        """
-        Creates and saves a superuser with the given username and password.
-        """
-        user = self.create_user(
-            username,
-            password=password,
-        )
+    def create_superuser(
+        self, username: str | None, password: str | None = None
+    ) -> User:
+        user = self.create_user(username=username, password=password)
         user.is_admin = True
-        user.save(using=self._db)
+        self.session.commit()
+        self.session.refresh(user)
         return user

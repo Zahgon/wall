@@ -1,27 +1,35 @@
-from rest_framework.test import APITestCase
-from django.utils.translation import gettext_lazy as _
+"""Tests for the ad model."""
+
+from __future__ import annotations
+
+import pytest
+from sqlalchemy.orm import Session
+
+from accounts.managers import UserManager
 from ads.models import Ad
-from accounts.models import User
+from wall.i18n import gettext_lazy as _
 
 
-class AuthorModelTest(APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.user = User.objects.create_user(username='Pedi')
-        cls.ad = Ad.objects.create(title='Iphone', caption='nice', publisher=cls.user)
+class TestAuthorModel:
+    @pytest.fixture(autouse=True)
+    def setup(self, db_session: Session) -> None:
+        self.user = UserManager(db_session).create_user(username="Pedi")
+        self.ad = Ad(title="Iphone", caption="nice", publisher=self.user)
+        db_session.add(self.ad)
+        db_session.commit()
+        db_session.refresh(self.ad)
 
-    def test_title_label(self):
-        field_label = self.ad._meta.get_field('title').verbose_name
-        self.assertEqual(field_label, _('title'))
+    def test_title_label(self) -> None:
+        field_label = Ad.verbose_name_of("title")
+        assert field_label == _("title")
 
-    def test_caption_label(self):
-        field_label = self.ad._meta.get_field('caption').verbose_name
-        self.assertEqual(field_label, _('caption'))
+    def test_caption_label(self) -> None:
+        field_label = Ad.verbose_name_of("caption")
+        assert field_label == _("caption")
 
-    def test_image_label(self):
-        field_label = self.ad._meta.get_field('image').verbose_name
-        self.assertEqual(field_label, _('image'))
+    def test_image_label(self) -> None:
+        field_label = Ad.verbose_name_of("image")
+        assert field_label == _("image")
 
-    def test_str_method(self):
-        expected_result = self.ad.title
-        self.assertEqual(self.ad.__str__(), expected_result)
+    def test_str_method(self) -> None:
+        assert self.ad.__str__() == self.ad.title

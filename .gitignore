@@ -249,3 +249,6 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 # End of https://www.toptal.com/developers/gitignore/api/django
+# The API message catalogue is a source resource carried with the project,
+# not a build artifact, so it is tracked despite the rule above.
+!locale/**/*.mo

@@ -1,0 +1,40 @@
+# Persian (fa_IR) messages for the API error surface.
+#
+# These message ids and their translations are the ones the project served
+# before: they come from the web framework layer that used to supply them,
+# and are vendored here unchanged so the responses stay identical now that
+# the framework no longer ships them.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: wall\n"
+"Report-Msgid-Bugs-To: \n"
+"Language: fa_IR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Authentication credentials were not provided."
+msgstr "اطلاعات برای اعتبارسنجی ارسال نشده است."
+
+msgid "Method \"{method}\" not allowed."
+msgstr "متد {method} مجاز نیست."
+
+msgid "Unsupported media type \"{media_type}\" in request."
+msgstr "نوع رسانه {media_type} در درخواست پشتیبانی نمیشود."
+
+msgid "Not found."
+msgstr "یافت نشد."
+
+msgid "Invalid page."
+msgstr "صفحه نامعتبر"
+
+msgid "This field is required."
+msgstr "این مقدار لازم است."
+
+msgid "Ensure this field has no more than {max_length} characters."
+msgstr "مطمعن شوید طول این مقدار بیشتر از {max_length} نیست."
+
+msgid "Upload a valid image. The file you uploaded was either not an image or a corrupted image."
+msgstr "یک عکس معتبر آپلود کنید. فایلی که ارسال کردید عکس یا عکس خراب شده نیست"
